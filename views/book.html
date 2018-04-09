@@ -2,20 +2,22 @@
 <html>
   <head>
     <meta charset="utf-8">
-    <title>Library</title>
-    <style>
-      
-    </style>
+    <title>{{with .Title}}{{.}}{{end}} | Library</title>
   </head>
   <body>
-    <h3>
-      {{}}
-    </h3>
-    <form action="submit" method="post">
-      <input type="text" name="index" placeholder="Index">
-      <input type="text" name="author" placeholder="Author">
-      <input type="text" name="title" placeholder="Title">
-      <input type="text" name="theme" placeholder="Theme">
-    </form>
+      <table>
+        <tr>
+          <td>Index</td>
+          <td>Author</td>
+          <td>Title</td>
+          <td>Theme</td>
+        </tr>
+        <tr>
+          {{with .Index}}<td>{{.}}</td>{{end}}
+          {{with .Author}}<td>{{.}}</td>{{end}}
+          {{with .Title}}<td>{{.}}</td>{{end}}
+          {{with .Theme}}<td>{{.}}</td>{{end}}
+        </tr>
+      </table>
   </body>
 </html>
