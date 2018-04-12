@@ -1,56 +1,73 @@
 package main
 
 import (
-	"fmt"
 	"html/template"
 	"log"
 	"net/http"
+	"strconv"
+
+	"github.com/jinzhu/gorm"
+	_ "github.com/jinzhu/gorm/dialects/sqlite"
 )
+
+// Book represents one physical book in the library.
+type Book struct {
+	gorm.Model
+	Index  int    `gorm:"unique;not null"`
+	Author string `gorm:"index:author"`
+	Title  string `gorm:"index:title"`
+	Theme  string `gorm:"index:theme"`
+}
+
+// Publication year number
+// Year acquired number
+// Roger first read year number
+// Jessica first read year number
+// Borrowed true/false bool
+// Borrowed by (name) string
+// Borrowed date
 
 var views = template.Must(template.ParseGlob("views/*.html"))
 
-func init() {
-
-}
-
 func main() {
-	address := ":3000"
-	http.HandleFunc("/", getMain)
-	http.HandleFunc("/books", createBook)
-	err := http.ListenAndServe(address, nil)
+	db, err := gorm.Open("sqlite3", "dev.db")
 	if err != nil {
-		log.Fatalf("error listening: %s", err)
+		panic("Failed to connect to db")
 	}
-}
-
-func getMain(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "text/html")
-	t, _ := template.ParseFiles("books.html")
-	t.Execute(w, "Title")
-}
-
-func getBooks(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "text/html")
-	views.ExecuteTemplate(w, "book.html", struct {
-		Index  float64
-		Author string
-		Title  string
-		Theme  string
-	}{
-		Index:  0,
-		Author: "Roger Kirkness",
-		Title:  "Book Title",
-		Theme:  "Theme",
+	defer db.Close()
+	db.AutoMigrate(&Book{})
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		switch r.Method {
+		case "GET":
+			var books []Book
+			db.Find(&books)
+			w.Header().Set("Content-Type", "text/html")
+			views.ExecuteTemplate(w, "books.html", books)
+		case "POST":
+		case "PUT":
+		case "DELETE":
+		}
 	})
-}
-
-func createBook(w http.ResponseWriter, r *http.Request) {
-	index := r.FormValue("index")
-	author := r.FormValue("author")
-	title := r.FormValue("title")
-	theme := r.FormValue("theme")
-	fmt.Println(index + author + title + theme)
-	redirectBack(w, r)
+	http.HandleFunc("/books", func(w http.ResponseWriter, r *http.Request) {
+		switch r.Method {
+		case "GET":
+		case "POST":
+			index, _ := strconv.Atoi(r.FormValue("index"))
+			db.Create(&Book{
+				Index:  index,
+				Author: r.FormValue("author"),
+				Title:  r.FormValue("title"),
+				Theme:  r.FormValue("theme"),
+			})
+			redirectBack(w, r)
+		case "PUT":
+		case "DELETE":
+		}
+	})
+	serverStartError := http.ListenAndServe(":3000", nil)
+	if serverStartError != nil {
+		log.Fatalf("error listening: %s", serverStartError)
+	}
 }
 
 func redirectBack(w http.ResponseWriter, r *http.Request) {

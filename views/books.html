@@ -2,14 +2,48 @@
 <html>
   <head>
     <meta charset="utf-8">
-    <title>{{.}}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>R&J Library</title>
+    <link rel="stylesheet" href="https://unpkg.com/spectre.css/dist/spectre.min.css">
+    <style>
+    .container {
+      padding-top: 10px;
+    }
+    </style>
   </head>
   <body>
-    <form action="books" method="post">
-      <input type="number" name="index" placeholder="Index">
-      <input type="text" name="author" placeholder="Author">
-      <input type="text" name="title" placeholder="Title">
-      <input type="text" name="theme" placeholder="Theme">
-    </form>
+    <div class="container">
+      <div class="columns">
+        <form action="books" method="post">
+          <div class="form-group">
+            <input class="form-input" type="text" name="index" placeholder="Index">
+            <input class="form-input" type="text" name="author" placeholder="Author">
+            <input class="form-input" type="text" name="title" placeholder="Title">
+            <input class="form-input" type="text" name="theme" placeholder="Theme">
+            <input class="btn" type="submit" value="Submit">
+          </div>
+        </form>
+        <table class="table table-striped table-hover">
+          <thead>
+            <tr>
+             <th>Index</th>
+              <th>Author</th>
+              <th>Title</th>
+              <th>Theme</th>
+            </tr>
+          </thead>
+          <tbody>
+            {{range .}}
+            <tr>
+              <td>{{.Index}}</td>
+              <td>{{.Author}}</td>
+              <td>{{.Title}}</td>
+              <td>{{.Theme}}</td>
+            </tr>
+            {{end}}
+          </tbody>
+        </table>
+      </div>
+    </div>
   </body>
 </html>
