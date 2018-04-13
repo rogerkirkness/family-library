@@ -53,14 +53,14 @@
               <form action="/books" method="post">
                 <div class="form-group">
                   <label class="form-label" for="index">Index</label>
-                  <input class="form-input" type="text" name="index">
+                  <input id="createBookIndex" class="form-input" type="text" name="Index">
                   <label class="form-label" for="author">Author</label>
-                  <input class="form-input" type="text" name="author">
+                  <input id="createBookAuthor" class="form-input" type="text" name="Author">
                   <label class="form-label" for="title">Title</label>
-                  <input class="form-input" type="text" name="title">
+                  <input id="createBookTitle" class="form-input" type="text" name="Title">
                   <label class="form-label" for="theme">Theme</label>
-                  <input class="form-input" type="text" name="theme"><br>
-                  <input class="btn btn-block" type="submit" value="Create Book">
+                  <input id="createBookTheme" class="form-input" type="text" name="Theme"><br>
+                  <input id="createBookSubmit" class="btn btn-block" type="submit" value="Create Book">
                 </div>
               </form>
             </div>
@@ -73,19 +73,19 @@
           <div class="modal-header">
             <div class="modal-title h5">Update Book</div>
           </div>
-          <form action="/books" method="post">
+          <form>
             <div class="modal-body">
               <div class="content">
                   <div class="form-group">
-                    <input id="updateBookID" class="form-input" type="hidden" name="id">
+                    <input id="updateBookID" class="form-input" type="hidden" name="ID">
                     <label class="form-label" for="index">Index</label>
-                    <input id="updateBookIndex" class="form-input" type="text" name="index">
+                    <input id="updateBookIndex" class="form-input" type="text" name="Index">
                     <label class="form-label" for="author">Author</label>
-                    <input id="updateBookAuthor" class="form-input" type="text" name="author">
+                    <input id="updateBookAuthor" class="form-input" type="text" name="Author">
                     <label class="form-label" for="title">Title</label>
-                    <input id="updateBookTitle" class="form-input" type="text" name="title">
+                    <input id="updateBookTitle" class="form-input" type="text" name="Title">
                     <label class="form-label" for="theme">Theme</label>
-                    <input id="updateBookTheme" class="form-input" type="text" name="theme"><br>
+                    <input id="updateBookTheme" class="form-input" type="text" name="Theme"><br>
                   </div>
               </div>
             </div>
@@ -101,13 +101,12 @@
           <div class="modal-header">
             <div class="modal-title h5">Delete Book</div>
           </div>
-          <form action="/books" method="post">
+          <form>
             <div class="modal-body">
               <div class="content">
                 <p>Are you sure you want to delete this book? It's a great one!</p>
                 <div class="form-group">
                   <input id="deleteBookID" class="form-input" type="hidden" name="id">
-                  <input id="method" class="form-input" type="hidden" name="method" value="DELETE">
                 </div>
               </div>
             </div>
@@ -122,12 +121,14 @@
         if (window.location.hostname === 'localhost') {
           return 'http://localhost:8080'
         } else {
-          return 'https://api.rogerkirkness.com'
+          return 'https://library.rogerkirkness.com'
         }
       }
       function updateBookDialog(ID) {
         document.getElementById('updateBookModal').classList.add('active')
-        fetch(calculateApiUrl() + '/books/' + ID)
+        fetch(calculateApiUrl() + '/books/' + ID, {
+          method: 'GET', headers: new Headers({'content-type': 'application/json'})
+        })
         .then((res) => { return res.json() })
         .then((body) => {
           document.getElementById('updateBookID').value = body.ID
@@ -141,6 +142,33 @@
       function deleteBookDialog(ID) {
         document.getElementById('deleteBookModal').classList.add('active')
         document.getElementById('deleteBookID').value = ID
+      }
+      document.getElementById('updateBookSubmit').onclick = () => {
+        var ID = document.getElementById('updateBookID').value
+        var updatedBook = {
+          Index: document.getElementById('updateBookIndex').value,
+          Author: document.getElementById('updateBookAuthor').value,
+          Title: document.getElementById('updateBookTitle').value,
+          Theme: document.getElementById('updateBookTheme').value
+        }
+        var request = new XMLHttpRequest()
+        request.open('PUT', calculateApiUrl() + '/books/' + ID, true)
+        request.onreadystatechange = () => {
+          console.log('Updated: ' + ID)
+          window.location = calculateApiUrl() + '/books'
+        }
+        request.setRequestHeader('Content-Type', 'application/json')
+        request.send(JSON.stringify(updatedBook))
+      }
+      document.getElementById('deleteBookSubmit').onclick = () => {
+        var ID = document.getElementById('deleteBookID').value
+        var request = new XMLHttpRequest()
+        request.open('DELETE', calculateApiUrl() + '/books/' + ID, true)
+        request.onreadystatechange = () => {
+          console.log('Deleted: ' + ID)
+        }
+        request.setRequestHeader('Content-Type', 'application/json')
+        request.send()
       }
       document.getElementById('closeCreateModal').onclick = () => {
         document.getElementById('createBookModal').classList.remove('active')

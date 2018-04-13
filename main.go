@@ -1,31 +1,22 @@
 package main
 
 import (
-	"fmt"
 	"html/template"
-	"strconv"
+	"log"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
 )
 
-// Book represents one physical book in the library.
+// Book represents phsyical library book.
 type Book struct {
 	gorm.Model
-	Index  int    `gorm:"index:number"`
-	Author string `gorm:"index:author"`
-	Title  string `gorm:"index:title"`
-	Theme  string `gorm:"index:theme"`
+	Index  string `form:"Index" json:"Index" gorm:"index:number"`
+	Author string `form:"Author" json:"Author" gorm:"index:author"`
+	Title  string `form:"Title" json:"Title" gorm:"index:title"`
+	Theme  string `form:"Theme" json:"Theme" gorm:"index:theme"`
 }
-
-// Publication year number
-// Year acquired number
-// Roger first read year number
-// Jessica first read year number
-// Borrowed true/false bool
-// Borrowed by (name) string
-// Borrowed date
 
 func main() {
 	router := gin.Default()
@@ -40,43 +31,65 @@ func main() {
 	router.GET("/books", func(c *gin.Context) {
 		var books []Book
 		db.Find(&books)
-		c.HTML(200, "books.html", books)
+		contentType := c.GetHeader("Content-Type")
+		if contentType == "application/json" {
+			c.JSON(200, books)
+		} else {
+			c.HTML(200, "books.html", books)
+		}
 	})
 	router.GET("/books/:id", func(c *gin.Context) {
 		var book Book
 		db.Find(&book, c.Param("id"))
-		c.JSON(200, book)
-	})
-	router.POST("/books", func(c *gin.Context) {
-		author := c.PostForm("author")
-		title := c.PostForm("title")
-		theme := c.PostForm("theme")
-		index, _ := strconv.Atoi(c.PostForm("index"))
-		id := c.PostForm("id")
-		if id != "" {
-			var book Book
-			method := c.PostForm("method")
-			fmt.Println(method)
-			db.First(&book, id)
-			if method != "" {
-				db.Delete(&book)
-				c.Redirect(302, "/books")
+		if book.ID != 0 {
+			contentType := c.GetHeader("Content-Type")
+			if contentType == "application/json" {
+				c.JSON(200, book)
 			} else {
-				book.Index = index
-				book.Author = author
-				book.Title = title
-				book.Theme = theme
-				db.Save(&book)
-				c.Redirect(302, "/books")
+				c.HTML(200, "book.html", book)
 			}
 		} else {
-			db.Create(&Book{
-				Index:  index,
-				Author: author,
-				Title:  title,
-				Theme:  theme,
-			})
-			c.Redirect(302, "/books")
+			c.JSON(400, gin.H{"id": c.Param("id"), "error": "not found"})
+		}
+	})
+	router.POST("/books", func(c *gin.Context) {
+		var book Book
+		err := c.ShouldBind(&book)
+		if err != nil {
+			c.JSON(500, gin.H{"error": err})
+		} else {
+			db.Create(&book)
+			contentType := c.GetHeader("Content-Type")
+			if contentType == "application/json" {
+				c.JSON(200, gin.H{"id": book.ID, "status": "created"})
+			} else {
+				c.Redirect(302, "http://localhost:8080/books")
+			}
+		}
+	})
+	router.PUT("/books/:id", func(c *gin.Context) {
+		var book Book
+		db.Find(&book, c.Param("id"))
+		if book.ID != 0 {
+			err := c.ShouldBind(&book)
+			if err != nil {
+				log.Println(err)
+			} else {
+				db.Save(&book)
+				c.JSON(200, gin.H{"id": book.ID, "status": "updated"})
+			}
+		} else {
+			c.JSON(400, gin.H{"id": c.Param("id"), "error": "not found"})
+		}
+	})
+	router.DELETE("/books/:id", func(c *gin.Context) {
+		var book Book
+		db.Find(&book, c.Param("id"))
+		if book.ID != 0 {
+			db.Delete(&book)
+			c.JSON(200, gin.H{"id": book.ID, "status": "deleted"})
+		} else {
+			c.JSON(400, gin.H{"id": c.Param("id"), "error": "not found"})
 		}
 	})
 	router.Run()
