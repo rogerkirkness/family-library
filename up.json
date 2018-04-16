@@ -5,9 +5,15 @@
     "memory": 128,
     "warm": true
   },
-  "profile": "default",
+  "profile": "personal",
   "environment": {
-    "PORT": "3000"
+    "PORT": "3000",
+    "DB_USER": "familylibrarian",
+    "DB_PASS": "cacheruleseverything",
+    "DB_NAME": "librarydb",
+    "DB_PORT": "5432",
+    "DB_HOST": "familylibrary.198188180261.us-east-1.rds.amazonaws.com",
+    "STAGE": "production"
   },
   "error_pages": {
     "disable": true

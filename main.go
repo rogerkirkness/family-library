@@ -19,11 +19,12 @@ type Book struct {
 }
 
 func main() {
-	router := gin.Default()
+
 	db, err := gorm.Open("sqlite3", "dev.db")
 	if err != nil {
 		panic("Failed to connect to db")
 	}
+	router := gin.Default()
 	db.AutoMigrate(&Book{})
 	defer db.Close()
 	var views = template.Must(template.ParseGlob("views/*.html"))
