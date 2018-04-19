@@ -1,0 +1,72 @@
+<script>
+  window.onload = () => {
+    var path = window.location.pathname
+    path = path.split('/')
+    document.getElementById(path[1]).classList.add('nav-active')
+  }
+  function calculateApiUrl() {
+    if (window.location.hostname === 'localhost') {
+      return 'http://localhost:8080'
+    } else {
+      return 'https://library.rogerkirkness.com'
+    }
+  }
+  function updateBookDialog(ID) {
+    document.getElementById('updateBookModal').classList.add('active')
+    fetch(calculateApiUrl() + '/books/' + ID, {
+      method: 'GET', headers: new Headers({ 'content-type': 'application/json' })
+    })
+      .then((res) => { return res.json() })
+      .then((body) => {
+        document.getElementById('updateBookID').value = body.ID
+        document.getElementById('updateBookIndex').value = body.Index
+        document.getElementById('updateBookAuthor').value = body.Author
+        document.getElementById('updateBookTitle').value = body.Title
+        document.getElementById('updateBookTheme').value = body.Theme
+      })
+      .catch((error) => { console.error(error) })
+  }
+  function deleteBookDialog(ID) {
+    document.getElementById('deleteBookModal').classList.add('active')
+    document.getElementById('deleteBookID').value = ID
+  }
+  document.getElementById('updateBookSubmit').onclick = () => {
+    var ID = document.getElementById('updateBookID').value
+    var updatedBook = {
+      Index: document.getElementById('updateBookIndex').value,
+      Author: document.getElementById('updateBookAuthor').value,
+      Title: document.getElementById('updateBookTitle').value,
+      Theme: document.getElementById('updateBookTheme').value
+    }
+    var request = new XMLHttpRequest()
+    request.open('PUT', calculateApiUrl() + '/books/' + ID, true)
+    request.onreadystatechange = () => {
+      console.log('Updated: ' + ID)
+      window.location = calculateApiUrl() + '/books'
+    }
+    request.setRequestHeader('Content-Type', 'application/json')
+    request.send(JSON.stringify(updatedBook))
+  }
+  document.getElementById('deleteBookSubmit').onclick = () => {
+    var ID = document.getElementById('deleteBookID').value
+    var request = new XMLHttpRequest()
+    request.open('DELETE', calculateApiUrl() + '/books/' + ID, true)
+    request.onreadystatechange = () => {
+      console.log('Deleted: ' + ID)
+    }
+    request.setRequestHeader('Content-Type', 'application/json')
+    request.send()
+  }
+  document.getElementById('closeCreateModal').onclick = () => {
+    document.getElementById('createBookModal').classList.remove('active')
+  }
+  document.getElementById('closeUpdateModal').onclick = () => {
+    document.getElementById('updateBookModal').classList.remove('active')
+  }
+  document.getElementById('closeDeleteModal').onclick = () => {
+    document.getElementById('deleteBookModal').classList.remove('active')
+  }
+  document.getElementById('createBook').onclick = () => {
+    document.getElementById('createBookModal').classList.add('active')
+  }
+</script>

@@ -1,21 +1,14 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>R&J Library</title>
-    <link rel="stylesheet" href="https://unpkg.com/spectre.css/dist/spectre.min.css">
-    <link href="data:image/x-icon;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQEAYAAABPYyMiAAAABmJLR0T///////8JWPfcAAAACXBIWXMAAABIAAAASABGyWs+AAAAF0lEQVRIx2NgGAWjYBSMglEwCkbBSAcACBAAAeaR9cIAAAAASUVORK5CYII=" rel="icon" type="image/x-icon">
-    <style>
-    .container {
-      padding: 20px;
-    }
-    </style>
-  </head>
-  <body>
-    <div class="container">
+{{ template "top.html" . }}
+{{ template "head.html" . }}
+<body>
+  <div class="container">
       <div class="columns">
-        <button class="btn" id="createBook">Create Book</button>
+        <div class="column col-2">
+          {{ template "nav.html" . }}
+        </div>
+        <div class="column col-10">
+        <h2 class="resourceHeader">Books</h2>
+        <button class="btn actionBtn" id="createBook">Create Book</button>
         <table class="table table-striped table-hover">
           <thead>
             <tr>
@@ -115,73 +108,7 @@
             </div>
           </form>
         </div>
+      </div>
     </div>
-    <script>
-      function calculateApiUrl () {
-        if (window.location.hostname === 'localhost') {
-          return 'http://localhost:8080'
-        } else {
-          return 'https://library.rogerkirkness.com'
-        }
-      }
-      function updateBookDialog(ID) {
-        document.getElementById('updateBookModal').classList.add('active')
-        fetch(calculateApiUrl() + '/books/' + ID, {
-          method: 'GET', headers: new Headers({'content-type': 'application/json'})
-        })
-        .then((res) => { return res.json() })
-        .then((body) => {
-          document.getElementById('updateBookID').value = body.ID
-          document.getElementById('updateBookIndex').value = body.Index
-          document.getElementById('updateBookAuthor').value = body.Author
-          document.getElementById('updateBookTitle').value = body.Title
-          document.getElementById('updateBookTheme').value = body.Theme
-        })
-        .catch((error) => { console.error(error) })
-      }
-      function deleteBookDialog(ID) {
-        document.getElementById('deleteBookModal').classList.add('active')
-        document.getElementById('deleteBookID').value = ID
-      }
-      document.getElementById('updateBookSubmit').onclick = () => {
-        var ID = document.getElementById('updateBookID').value
-        var updatedBook = {
-          Index: document.getElementById('updateBookIndex').value,
-          Author: document.getElementById('updateBookAuthor').value,
-          Title: document.getElementById('updateBookTitle').value,
-          Theme: document.getElementById('updateBookTheme').value
-        }
-        var request = new XMLHttpRequest()
-        request.open('PUT', calculateApiUrl() + '/books/' + ID, true)
-        request.onreadystatechange = () => {
-          console.log('Updated: ' + ID)
-          window.location = calculateApiUrl() + '/books'
-        }
-        request.setRequestHeader('Content-Type', 'application/json')
-        request.send(JSON.stringify(updatedBook))
-      }
-      document.getElementById('deleteBookSubmit').onclick = () => {
-        var ID = document.getElementById('deleteBookID').value
-        var request = new XMLHttpRequest()
-        request.open('DELETE', calculateApiUrl() + '/books/' + ID, true)
-        request.onreadystatechange = () => {
-          console.log('Deleted: ' + ID)
-        }
-        request.setRequestHeader('Content-Type', 'application/json')
-        request.send()
-      }
-      document.getElementById('closeCreateModal').onclick = () => {
-        document.getElementById('createBookModal').classList.remove('active')
-      }
-      document.getElementById('closeUpdateModal').onclick = () => {
-        document.getElementById('updateBookModal').classList.remove('active')
-      }
-      document.getElementById('closeDeleteModal').onclick = () => {
-        document.getElementById('deleteBookModal').classList.remove('active')
-      }
-      document.getElementById('createBook').onclick = () => {
-        document.getElementById('createBookModal').classList.add('active')
-      }
-    </script>
-  </body>
-</html>
+{{ template "script.html" . }}
+{{ template "bottom.html" . }}

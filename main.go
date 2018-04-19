@@ -19,7 +19,6 @@ type Book struct {
 }
 
 func main() {
-
 	db, err := gorm.Open("sqlite3", "dev.db")
 	if err != nil {
 		panic("Failed to connect to db")
