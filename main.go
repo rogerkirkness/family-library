@@ -35,7 +35,7 @@ func main() {
 		if contentType == "application/json" {
 			c.JSON(200, books)
 		} else {
-			c.HTML(200, "books.html", books)
+			c.HTML(200, "books", books)
 		}
 	})
 	router.GET("/books/:id", func(c *gin.Context) {
@@ -46,7 +46,7 @@ func main() {
 			if contentType == "application/json" {
 				c.JSON(200, book)
 			} else {
-				c.HTML(200, "book.html", book)
+				c.HTML(200, "book", book)
 			}
 		} else {
 			c.JSON(400, gin.H{"id": c.Param("id"), "error": "not found"})
